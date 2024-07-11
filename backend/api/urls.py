@@ -10,7 +10,6 @@ router.register(r'subcategories', SubcategoryViewSet, basename='subcategory')
 router.register(r'problems', ProblemViewSet, basename='problem')
 router.register(r'submissions', SubmissionViewSet, basename='submission')
 
-
 urlpatterns = [    
     path('', include(router.urls)),
     path('token/', TokenObtainPairView.as_view(), name='get_token'),    #POST

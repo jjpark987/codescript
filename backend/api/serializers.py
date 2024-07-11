@@ -23,6 +23,9 @@ class SubcategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Subcategory
         fields = ['id', 'name', 'description', 'category']
+        extra_kwargs = {
+            'category': {'read_only': True},
+        }
 
 class ProblemSerializer(serializers.ModelSerializer):
     class Meta:
@@ -31,12 +34,16 @@ class ProblemSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'created_at': {'read_only': True},
             'updated_at': {'read_only': True},
+            'category': {'read_only': True},
+            'subcategory': {'read_only': True},
         }
 
 class SubmissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Submission
-        fields = ['id', 'title', 'content', 'analysis', 'score', 'created_at', 'user', 'problem']
+        fields = ['id', 'content', 'created_at', 'updated_at', 'problem', 'user']
         extra_kwargs = {
             'created_at': {'read_only': True},
+            'problem': {'read_only': True},
+            'user': {'read_only': True},
         }

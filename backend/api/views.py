@@ -50,6 +50,6 @@ class SubmissionViewSet(viewsets.ModelViewSet):
         return Submission.objects.filter(user=user)
     
     def get_permissions(self):
-        if self.action in ['update', 'destroy']:
+        if self.action == 'destroy':
             return [permissions.IsAdminUser()]
         return [permissions.IsAuthenticated()]

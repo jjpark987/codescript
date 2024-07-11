@@ -21,7 +21,7 @@ class Problem(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     examples = models.TextField()
-    example_images = models.ImageField(upload_to='images/')
+    example_images = models.ImageField(upload_to='images/', null=True, blank=True)
     constraints = models.TextField()
     difficulty = models.CharField(max_length=10, choices=[
         ('EASY', 'Easy'), 
@@ -31,26 +31,20 @@ class Problem(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='problem')
-    subcategory = models.ForeignKey(Subcategory, on_delete=models.SET_NULL, null=True, related_name='problem')
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='problem')
+    subcategory = models.ForeignKey(Subcategory, on_delete=models.SET_NULL, null=True, blank=True, related_name='problem')
 
     def __str__(self) -> str:
         return self.title
 
 class Submission(models.Model):
-    title = models.CharField(max_length=200)
     content = models.TextField()
-    analysis = models.TextField()
-    score = models.IntegerField(null=True, blank=True, choices=[
-        (1, 'Incorrect'),
-        (2, 'Partially Correct'),
-        (3, 'Correct'),
-    ])
 
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='submissions')
     problem = models.ForeignKey(Problem, on_delete=models.CASCADE, related_name='submissions')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='submissions')
 
     def __str__(self) -> str:
-        return self.title
+        return f'Submission ID: {self.id}, Problem ID: {self.problem.id}, User ID: {self.user.id}'
