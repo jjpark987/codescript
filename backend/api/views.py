@@ -1,8 +1,8 @@
 from rest_framework import viewsets, permissions
 from rest_framework_simplejwt import authentication
 from django.contrib.auth.models import User
-from .models import Category, Subcategory, Problem, Submission
-from .serializers import UserSerializer, CategorySerializer, SubcategorySerializer, ProblemSerializer, SubmissionSerializer
+from .models import Category, Subcategory, Problem, Example, Submission
+from .serializers import UserSerializer, CategorySerializer, SubcategorySerializer, ProblemSerializer, ExampleSerializer, SubmissionSerializer
 
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
@@ -38,6 +38,10 @@ class SubcategoryViewSet(BaseViewSet):
 class ProblemViewSet(BaseViewSet):
     queryset = Problem.objects.all()
     serializer_class = ProblemSerializer
+
+class ExampleViewSet(BaseViewSet):
+    queryset = Example.objects.all()
+    serializer_class = ExampleSerializer
 
 class SubmissionViewSet(viewsets.ModelViewSet):
     authentication_classes = [authentication.JWTAuthentication]

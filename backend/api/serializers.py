@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Category, Subcategory, Problem, Submission
+from .models import Category, Subcategory, Problem, Example, Submission
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -30,12 +30,22 @@ class SubcategorySerializer(serializers.ModelSerializer):
 class ProblemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Problem
-        fields = ['id', 'title', 'description', 'examples', 'example_images', 'constraints', 'difficulty', 'created_at', 'updated_at', 'category', 'subcategory']
+        fields = ['id', 'title', 'description', 'constraints', 'difficulty', 'created_at', 'updated_at', 'category', 'subcategory']
         extra_kwargs = {
             'created_at': {'read_only': True},
             'updated_at': {'read_only': True},
             'category': {'read_only': True},
             'subcategory': {'read_only': True},
+        }
+
+class ExampleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Example
+        fields = ['id', 'content', 'image_url', 'created_at', 'updated_at', 'problem']
+        extra_kwargs = {
+            'created_at': {'read_only': True},
+            'updated_at': {'read_only': True},
+            'problem': {'read_only': True},
         }
 
 class SubmissionSerializer(serializers.ModelSerializer):
@@ -44,6 +54,7 @@ class SubmissionSerializer(serializers.ModelSerializer):
         fields = ['id', 'content', 'created_at', 'updated_at', 'problem', 'user']
         extra_kwargs = {
             'created_at': {'read_only': True},
+            'updated_at': {'read_only': True},
             'problem': {'read_only': True},
             'user': {'read_only': True},
         }
