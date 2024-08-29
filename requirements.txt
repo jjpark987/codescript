@@ -1,0 +1,9 @@
+# Jupyter Notebook and Kernel
+ipykernel>=6.29.5
+ipywidgets>=8.1.5
+notebook>=7.2.2
+
+# Hugging Face Transformers and Dependencies
+numpy<2
+torch>=2.2.2
+transformers>=4.44.2
