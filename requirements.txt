@@ -8,8 +8,8 @@ ipywidgets>=8.1.5
 notebook>=7.2.2
 
 # Hugging Face Dependencies
-# accelerate>=0.34.2
-# huggingface_hub>=0.24.6
-# numpy<2
-# torch>=2.2.2
-# transformers>=4.44.2
+accelerate>=0.34.2
+huggingface_hub>=0.24.6
+numpy<2
+torch>=2.2.2
+transformers>=4.44.2
