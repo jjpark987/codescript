@@ -1,86 +1,67 @@
-from fastapi_users.db import SQLAlchemyBaseUserTableUUID
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime
+from datetime import datetime
+from sqlalchemy import Integer, String, Text, JSON, DateTime, ForeignKey, CheckConstraint, func
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
 
 Base = declarative_base()
 
-# Extend the FastAPI Users table
-class User(SQLAlchemyBaseUserTableUUID, Base):
-    __tablename__ = "users"
-    
-    username = Column(String, nullable=True)
-    last_name = Column(String, nullable=True)
-
-# Category Model
 class Category(Base):
     __tablename__ = 'categories'
+    
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
+    description: Mapped[str] = mapped_column(String(255))
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(50), nullable=False)
-    description = Column(Text)
+    subcategories: Mapped[list['Subcategory']] = relationship('Subcategory', back_populates='category')
 
-    subcategories = relationship('Subcategory', back_populates='category')
-    problems = relationship('Problem', back_populates='category')
+    def __str__(self) -> str:
+        return self.name
 
-# Subcategory Model
 class Subcategory(Base):
     __tablename__ = 'subcategories'
+    
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    description: Mapped[str] = mapped_column(String(255))
+    category_id: Mapped[int] = mapped_column(Integer, ForeignKey('categories.id'), nullable=True)
+    
+    category: Mapped['Category'] = relationship('Category', back_populates='subcategories')
+    problems: Mapped[list['Problem']] = relationship('Problem', back_populates='subcategory')
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(50), nullable=False)
-    description = Column(Text)
-    category_id = Column(Integer, ForeignKey('categories.id', ondelete='CASCADE'))
+    def __str__(self) -> str:
+        return self.name
 
-    category = relationship('Category', back_populates='subcategories')
-    problems = relationship('Problem', back_populates='subcategory')
-
-# Problem Model
 class Problem(Base):
     __tablename__ = 'problems'
-
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String(200), nullable=False)
-    description = Column(Text, nullable=False)
-    constraints = Column(Text)
-    difficulty = Column(Integer, nullable=False)  # 1: Easy, 2: Medium, 3: Hard
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
-    category_id = Column(Integer, ForeignKey('categories.id', ondelete='SET NULL'), nullable=True)
-    subcategory_id = Column(Integer, ForeignKey('subcategories.id', ondelete='SET NULL'), nullable=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    difficulty: Mapped[int] = mapped_column(Integer, nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    example: Mapped[dict] = mapped_column(JSON, nullable=False)
+    constraints: Mapped[str] = mapped_column(String, nullable=False)
+    subcategory_id: Mapped[int] = mapped_column(Integer, ForeignKey('subcategories.id'), nullable=False)
 
-    category = relationship('Category', back_populates='problems')
-    subcategory = relationship('Subcategory', back_populates='problems')
-    examples = relationship('Example', back_populates='problem')
-    submissions = relationship('Submission', back_populates='problem')
+    subcategory: Mapped['Subcategory'] = relationship('Subcategory', back_populates='problems')
+    submissions: Mapped[list['Submission']] = relationship('Submission', back_populates='problem')
 
-# Example Model
-class Example(Base):
-    __tablename__ = 'examples'
+    __table_args__ = (
+        CheckConstraint('difficulty IN (1, 2, 3)', name='check_difficulty'),
+    )
 
-    id = Column(Integer, primary_key=True, index=True)
-    content = Column(Text, nullable=False)
-    image_url = Column(String, nullable=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    def __str__(self) -> str:
+        return self.title
 
-    problem_id = Column(Integer, ForeignKey('problems.id', ondelete='CASCADE'))
-
-    problem = relationship('Problem', back_populates='examples')
-
-# Submission Model
 class Submission(Base):
     __tablename__ = 'submissions'
+    
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    content: Mapped[str] = mapped_column(String, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    user_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    problem_id: Mapped[int] = mapped_column(Integer, ForeignKey('problems.id'), nullable=False)
+    
+    problem: Mapped['Problem'] = relationship('Problem', back_populates='submissions')
 
-    id = Column(Integer, primary_key=True, index=True)
-    content = Column(Text, nullable=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-
-    problem_id = Column(Integer, ForeignKey('problems.id', ondelete='CASCADE'))
-    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'))  # Assuming user management elsewhere
-
-    problem = relationship('Problem', back_populates='submissions')
-    user = relationship('User', back_populates='submissions')  # Assuming user model exists
+    def __str__(self) -> str:
+        return f'Submission ID: {self.id}, Problem ID: {self.problem.id}, User ID: {self.user_id}'
